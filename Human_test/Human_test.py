@@ -1,4 +1,4 @@
-﻿import re
+import re
 from transformers import pipeline
 from transformers import BertTokenizer, BertForNextSentencePrediction 
 import torch
@@ -23,7 +23,7 @@ def function1(sentences):
             else:
                 divergence += (len(tokens) - mean)**2
     result_divergence = (divergence/count)**(1/2) #средняя квадратичная ошибка
-    if result_divergence <= 7.93:
+    if result_divergence < 8.93:
         return 1
     else:
         return 0
@@ -38,7 +38,7 @@ def length(sentences):
                 sum_len += len(token)
                 count += 1
     result_len = sum_len/count
-    if result_len <= 7.67:
+    if result_len > 7.67:
         return 1
     else:
         return 0
@@ -86,10 +86,10 @@ def number_of_words(sentences):
         k += 1
         sum += len(tokens)
     sum_result = sum/k
-    if sum_result < 17.37:
-        return 0, sum
-    else:
+    if sum_result < 21.67:
         return 1, sum
+    else:
+        return 0, sum
 
 def tabs(text):
     tab=0
@@ -128,10 +128,10 @@ def brackets(text):
     bracket = text.count("(")
     sum_number_of_words = number_of_words(sentences)[1]
     bracket = bracket/sum_number_of_words
-    if bracket<0.0010:
-        return 0
-    else:
+    if bracket>0.0046:
         return 1
+    else:
+        return 0
 
 def slashs(text):
     slash = text.count("/")
@@ -144,10 +144,10 @@ def points(text):
     point = text.count(":")
     sum_number_of_words = number_of_words(sentences)[1]
     point = point/sum_number_of_words
-    if point>=0.009:
-        return 0
-    else:
+    if point>=0.0009:
         return 1
+    else:
+        return 0
 
 def keywords(text):
     k1="Таким образом"
@@ -171,6 +171,58 @@ def keywords(text):
     else:
         return 0
 
+
+classifier = pipeline("text-classification", model="blanchefort/rubert-base-cased-sentiment")
+file = open(r'C:\dataset\test_text.txt', 'r', encoding='utf-8')
+text = file.read()
+sentences = re.split(r'[.!?]', text)
+sentences = [s.strip() for s in sentences if s.strip()]
+
+k1 = function1(sentences)
+k2 = length(sentences)
+k3 = number_of_words(sentences)[0]
+k4 = tabs(text)
+k5 = emotions(text)
+k6 = connection(sentences)
+k7 = tires(text)
+k8 = quotes(text)
+k9 = brackets(text)
+k10 = slashs(text)
+k11 = points(text)
+k12 = keywords(text)
+w1 = 1
+w2 = 1
+w3 = 1
+w4 = 1
+w5 = 0.3
+w6 = 1
+w7 = 1
+w8 = 1
+w9 = 1
+w10 = 1
+w11 = 1
+w12 = 1
+
+result = (k1*w1 + k2*w2 + k3*w3 + k4*w4 + k5*w5 + k6*w6 + k7*w7 + k8*w8 + k9*w9 + k10*w10 + k11*w11 + k12*w12)/(w1+w2+w3+w4+w5+w6+w7+w8+w9+w10+w11+w12)
+
+print(k1)
+print(k2)
+print(k3)
+print(k4)
+print(k5)
+print(k6)
+print(k7)
+print(k8)
+print(k9)
+print(k10)
+print(k11)
+print(k12)
+
+
+if result>0.5:
+    print(f'Текст сгенерирован ИИ с вероятностью {(result*100):.2f} %')
+else:
+    print(f'Текст написан человеком c вероятностью {((1-result)*100):.2f} %')
 
 classifier = pipeline("text-classification", model="blanchefort/rubert-base-cased-sentiment")
 file = open(r'C:\dataset\test_text.txt', 'r', encoding='utf-8')
